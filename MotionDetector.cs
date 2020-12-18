@@ -106,6 +106,39 @@ namespace AOCI_6
                 capture.Retrieve(frame);
                 capture.Retrieve(frameOrig);
                 Image<Gray, byte> cur = frame.ToImage<Gray, byte>();
+                Image<Gray, byte> curOrig = frameOrig.ToImage<Gray, byte>();
+                var outputOrig = frameOrig.ToImage<Bgr, byte>().Copy();
+
+                if (bg != null)
+                {
+                    Image<Gray, byte> diff = bg.AbsDiff(cur);
+
+                    diff._ThresholdBinary(new Gray(100), new Gray(255));
+
+                    diff.Erode(3);
+                    diff.Dilate(4);
+
+                    VectorOfVectorOfPoint contoursOrig = new VectorOfVectorOfPoint();
+                    CvInvoke.FindContours(
+                             diff,
+                             contoursOrig,
+                             null,
+                             RetrType.External, // получение только внешних контуров
+                             ChainApproxMethod.ChainApproxTc89L1);
+
+                    outputOrig = frameOrig.ToImage<Bgr, byte>().Copy();
+
+                    for (int i = 0; i < contoursOrig.Size; i++)
+                    {
+                        if (CvInvoke.ContourArea(contoursOrig[i], false) > 700) //игнорирование маленьких контуров
+                        {
+                            Rectangle rectOrig = CvInvoke.BoundingRectangle(contoursOrig[i]);
+                            outputOrig.Draw(rectOrig, new Bgr(Color.GreenYellow), 1);
+                        }
+                    }
+                }
+
+                //bg = frame.ToImage<Gray, byte>();
 
                 var foregroundMask = cur.CopyBlank();
                 subtractor.Apply(cur, foregroundMask);
@@ -125,7 +158,6 @@ namespace AOCI_6
                          ChainApproxMethod.ChainApproxTc89L1);
 
                 var output = frame.ToImage<Bgr, byte>().Copy();
-                var outputOrig = frameOrig.ToImage<Bgr, byte>().Copy();
 
                 for (int i = 0; i < contours.Size; i++)
                 {
@@ -136,8 +168,7 @@ namespace AOCI_6
                     }
                 }
 
-                ImageProcessed?.Invoke(this, new ImageEventArgs { Image = output });
-                ImageProcessed?.Invoke(this, new ImageEventArgs { ImageOriginal = outputOrig });
+                ImageProcessed?.Invoke(this, new ImageEventArgs { Image = output, ImageOriginal = outputOrig });
             }
             catch (Exception ex)
             {

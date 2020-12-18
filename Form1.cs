@@ -61,5 +61,13 @@ namespace AOCI_6
                 timer1.Enabled = true;
             }
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var frame = new Mat();
+            resultImage.capture.Retrieve(frame);
+
+            resultImage.bg = frame.ToImage<Gray, byte>();
+        }
     }
 }
