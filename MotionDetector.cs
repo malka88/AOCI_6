@@ -102,12 +102,13 @@ namespace AOCI_6
             try
             {
                 var frame = new Mat();
-                var frameOrig = new Mat();
+                //var frameOrig = new Mat();
                 capture.Retrieve(frame);
-                capture.Retrieve(frameOrig);
+                //capture.Retrieve(frameOrig);
+
                 Image<Gray, byte> cur = frame.ToImage<Gray, byte>();
-                Image<Gray, byte> curOrig = frameOrig.ToImage<Gray, byte>();
-                var outputOrig = frameOrig.ToImage<Bgr, byte>().Copy();
+                Image<Gray, byte> curOrig = frame.ToImage<Gray, byte>();
+                var outputOrig = frame.ToImage<Bgr, byte>().Copy();
 
                 if (bg != null)
                 {
@@ -126,7 +127,7 @@ namespace AOCI_6
                              RetrType.External, // получение только внешних контуров
                              ChainApproxMethod.ChainApproxTc89L1);
 
-                    outputOrig = frameOrig.ToImage<Bgr, byte>().Copy();
+                    //outputOrig = curOrig.ToImage<Bgr, byte>().Copy();
 
                     for (int i = 0; i < contoursOrig.Size; i++)
                     {
